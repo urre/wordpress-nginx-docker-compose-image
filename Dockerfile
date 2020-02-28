@@ -1,4 +1,4 @@
-FROM php:7.2-fpm
+FROM php:7.4-fpm
 
 # install the PHP extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
 RUN set -ex; \
@@ -10,9 +10,10 @@ RUN set -ex; \
 		libjpeg-dev \
 		libmagickwand-dev \
 		libpng-dev \
+        libzip-dev \
 	; \
 	\
-	docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr; \
+	docker-php-ext-configure gd --with-freetype --with-jpeg; \
 	docker-php-ext-install \
 		bcmath \
 		exif \
