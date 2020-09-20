@@ -1,4 +1,4 @@
-FROM php:7.2-fpm
+FROM php:7.4-fpm
 
 # install the PHP extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
 RUN set -ex; \
@@ -18,6 +18,8 @@ RUN set -ex; \
 		exif \
 		gd \
 		mysqli \
+		mysql \
+		mysql-client \
 		opcache \
 		zip \
 	; \
