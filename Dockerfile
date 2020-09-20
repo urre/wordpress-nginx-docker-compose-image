@@ -10,6 +10,9 @@ RUN set -ex; \
 		libjpeg-dev \
 		libmagickwand-dev \
 		libpng-dev \
+		libpng-dev \
+		mariadb-client \
+		mysql-client
 	; \
 	\
 	docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr; \
@@ -18,8 +21,6 @@ RUN set -ex; \
 		exif \
 		gd \
 		mysqli \
-		mysql \
-		mysql-client \
 		opcache \
 		zip \
 	; \
