@@ -11,7 +11,6 @@ RUN set -ex; \
 		libmagickwand-dev \
 		libpng-dev \
 		libpng-dev \
-		mariadb-client \
 		mysql-client
 	; \
 	\
