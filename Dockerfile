@@ -95,8 +95,3 @@ RUN set -ex; \
 	chmod -R 777 wp-content
 
 VOLUME /var/www/html
-
-COPY docker-entrypoint.sh /usr/local/bin/
-
-ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["php-fpm"]
