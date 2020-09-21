@@ -11,7 +11,7 @@ RUN set -ex; \
 		libmagickwand-dev \
 		libpng-dev \
 		libpng-dev \
-		mysql-client \
+		mysql-client-default \
 	; \
 	\
 	docker-php-ext-configure gd --with-png-dir=/usr --with-jpeg-dir=/usr; \
