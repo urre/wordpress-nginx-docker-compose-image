@@ -74,8 +74,8 @@ RUN { \
 		echo 'html_errors = Off'; \
 	} > /usr/local/etc/php/conf.d/error-logging.ini
 
-ENV WORDPRESS_VERSION 5.9.1
-ENV WORDPRESS_SHA1 15746f848cd388e270bae612dccd0c83fa613259
+ENV WORDPRESS_VERSION 6.0
+ENV WORDPRESS_SHA1 7a5a6d0591771e730b05c49d0c3fc134624d0491
 
 RUN set -ex; \
 	curl -o wordpress.tar.gz -fSL "https://wordpress.org/wordpress-${WORDPRESS_VERSION}.tar.gz"; \
@@ -94,4 +94,3 @@ RUN set -ex; \
 	chmod -R 777 wp-content
 
 VOLUME /var/www/html
-
