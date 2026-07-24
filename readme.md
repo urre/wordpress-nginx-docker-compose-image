@@ -2,5 +2,5 @@ Docker image for [wordpress-nginx-docker-compose](https://github.com/urre/wordpr
 
 ![](https://img.shields.io/docker/pulls/urre/wordpress-nginx-docker-compose-image)
 
-+ Using PHP 8.1
++ Using PHP 8.3
 + Automated build via [Docker Hub](https://hub.docker.com/repository/registry-1.docker.io/urre/wordpress-nginx-docker-compose-image)
