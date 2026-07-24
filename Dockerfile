@@ -1,4 +1,4 @@
-FROM php:8.1-fpm
+FROM php:8.3-fpm
 
 # persistent dependencies
 RUN set -eux; \
@@ -10,9 +10,12 @@ RUN set -eux; \
 	rm -rf /var/lib/apt/lists/*
 
 # install the PHP extensions we need (https://make.wordpress.org/hosting/handbook/handbook/server-environment/#php-extensions)
+# NOTE: the -dev library packages are kept (not purged) so their runtime
+# shared objects (libMagickWand, libzip, etc.) remain available for the
+# extensions at runtime. This is simpler and more robust than the
+# ldd/apt-mark auto-removal dance, at the cost of a slightly larger image —
+# an acceptable trade-off for a local development base image.
 RUN set -ex; \
-	\
-	savedAptMark="$(apt-mark showmanual)"; \
 	\
 	apt-get update; \
 	apt-get install -y --no-install-recommends \
@@ -31,21 +34,16 @@ RUN set -ex; \
 		mysqli \
 		zip \
 	; \
-	pecl install imagick-3.7.0; \
-	docker-php-ext-enable imagick; \
 	\
-# reset apt-mark's "manual" list so that "purge --auto-remove" will remove all build dependencies
-	apt-mark auto '.*' > /dev/null; \
-	apt-mark manual $savedAptMark; \
-	ldd "$(php -r 'echo ini_get("extension_dir");')"/*.so \
-		| awk '/=>/ { print $3 }' \
-		| sort -u \
-		| xargs -r dpkg-query -S \
-		| cut -d: -f1 \
-		| sort -u \
-		| xargs -rt apt-mark manual; \
+# The last tagged PECL imagick release (3.7.0) does not build on PHP 8.3,
+# so install imagick from the upstream master branch, which includes the
+# PHP 8.3+ build fixes.
+	curl -fsSL https://github.com/Imagick/imagick/archive/refs/heads/master.tar.gz -o /tmp/imagick.tar.gz; \
+	mkdir -p /usr/src/php/ext/imagick; \
+	tar -xzf /tmp/imagick.tar.gz -C /usr/src/php/ext/imagick --strip-components=1; \
+	rm /tmp/imagick.tar.gz; \
+	docker-php-ext-install imagick; \
 	\
-	apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false; \
 	rm -rf /var/lib/apt/lists/*
 
 # set recommended PHP.ini settings
@@ -74,23 +72,9 @@ RUN { \
 		echo 'html_errors = Off'; \
 	} > /usr/local/etc/php/conf.d/error-logging.ini
 
-ENV WORDPRESS_VERSION 6.0
-ENV WORDPRESS_SHA1 7a5a6d0591771e730b05c49d0c3fc134624d0491
-
-RUN set -ex; \
-	curl -o wordpress.tar.gz -fSL "https://wordpress.org/wordpress-${WORDPRESS_VERSION}.tar.gz"; \
-	echo "$WORDPRESS_SHA1 *wordpress.tar.gz" | sha1sum -c -; \
-# upstream tarballs include ./wordpress/ so this gives us /usr/src/wordpress
-	tar -xzf wordpress.tar.gz -C /usr/src/; \
-	rm wordpress.tar.gz; \
-	chown -R www-data:www-data /usr/src/wordpress; \
-# pre-create wp-content (and single-level children) for folks who want to bind-mount themes, etc so permissions are pre-created properly instead of root:root
-	mkdir wp-content; \
-	for dir in /usr/src/wordpress/wp-content/*/; do \
-		dir="$(basename "${dir%/}")"; \
-		mkdir "wp-content/$dir"; \
-	done; \
-	chown -R www-data:www-data wp-content; \
-	chmod -R 777 wp-content
+# NOTE: WordPress core is intentionally NOT bundled here. The consuming project
+# (wordpress-nginx-docker-compose) uses Bedrock, which installs WordPress core
+# via Composer into web/wp and bind-mounts the app over /var/www/html. This
+# image only needs to provide PHP-FPM and the WordPress-recommended extensions.
 
 VOLUME /var/www/html
